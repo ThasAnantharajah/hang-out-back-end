@@ -5,14 +5,14 @@ var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
-var uploadRouter = require('./routes/upload')
+var indexRouter = require("./routes/index");
+var usersRouter = require("./routes/users");
+var eventsRouter = require("./routes/events");
+
+var uploadRouter = require("./routes/upload");
 
 var app = express();
-const fileUpload = require('express-fileupload');
-app.use(fileUpload());
-const cors = require('cors');
+const cors = require("cors");
 app.use(cors());
 
 // upload setup
@@ -24,10 +24,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
-
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
-app.use('/', uploadRouter);
+app.use("/", indexRouter);
+app.use("/users", usersRouter);
+app.use("/", uploadRouter);
 app.use("/events", eventsRouter);
 
 module.exports = app;
