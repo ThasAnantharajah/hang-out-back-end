@@ -5,7 +5,12 @@ const userSchema = mongoose.Schema({
     username:String,
     password:String,
     token:String,
-    profilUrl: String
+    profilUrl: String,
+    
+    friends: [{
+        userId: String,
+        profile : String,
+    }]
 })
 
 const User = mongoose.model('users', userSchema)

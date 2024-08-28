@@ -17,7 +17,7 @@ router.post('/signup', (req,res) => {
   }
 
   User.findOne({username: req.body.username}).then(data => {
-      if(data === null ){
+      if(data === null){
         const hash = bcrypt.hashSync(req.body.password, 10);
 
           const newUser = new User({
@@ -46,7 +46,7 @@ router.post("/login", (req, res) => {
 
   User.findOne({ username: req.body.username }).then(data => {
     if (data && bcrypt.compareSync(req.body.password, data.password)) {
-      res.json({ result: true, token: data.token, username: data.username, email: data.email});
+      res.json({ result: true, token: data.token, username: data.username, email: data.email, userId: data._id});
     } else {
       res.json({ result: false, error: 'User not found or wrong password' });
     }
