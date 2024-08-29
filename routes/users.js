@@ -54,6 +54,7 @@ router.post("/login", (req, res) => {
         token: data.token,
         username: data.username,
         email: data.email,
+        userId: data._id,
       });
     } else {
       res.json({ result: false, error: "User not found or wrong password" });
