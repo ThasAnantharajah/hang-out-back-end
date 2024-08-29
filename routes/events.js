@@ -27,17 +27,34 @@ router.post("/add", (req, res) => {
 });
 
 router.get("/search", (req, res) => {
-  const { activity, city, region, day, start, end } = req.query;
+  // MAE WORKING ON
+  // const {
+  //   activityInput,
+  //   cityInput,
+  //   regionInput,
+  //   dayInput,
+  //   startInput,
+  //   endInput,
+  // } = req.query;
 
-  const searchCriteria = {};
-  if (activity) searchCriteria.activity = { $regex: activity, $options: "i" };
-  if (city) searchCriteria.city = { $regex: city, $options: "i" };
-  if (region) searchCriteria.region = { $regex: region, $options: "i" };
-  if (day) searchCriteria.date = new Date(day);
-  if (start) searchCriteria.startTime = { $gte: start };
-  if (end) searchCriteria.endTime = { $lte: end };
+  // const searchCriteria = {};
+  // if (activityInput)
+  //   searchCriteria.activity = { $regex: activityInput, $options: "i" };
+  // if (cityInput) searchCriteria.city = { $regex: cityInput, $options: "i" };
+  // if (regionInput)
+  //   searchCriteria.region = { $regex: regionInput, $options: "i" };
 
-  Event.find(searchCriteria).then((data) => {
+  // if (dayInput) {
+  //   const date = new Date(dayInput);
+  //   if (!isNaN(date.getTime())) {
+  //     searchCriteria.date = date;
+  //   }
+  // }
+
+  // if (startInput) searchCriteria.startTime = { $gte: startInput };
+  // if (endInput) searchCriteria.endTime = { $lte: endInput };
+
+  Event.find().then((data) => {
     res.json({ result: true, events: data });
   });
 });
