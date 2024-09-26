@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
 
 const userSchema = mongoose.Schema({
   email: String,
@@ -7,18 +8,13 @@ const userSchema = mongoose.Schema({
   token: String,
   profilePic: String,
   name: String,
-  birthdate: String,
+  birthdate:{Date: Date},
   gender: String,
   description: String,
-  activities: [String],
-  sports: [String],
+  activities: [{ name: String }],
+  sports: [{ name: String }],
   city: String,
-  friends: [
-    {
-      userId: String,
-      profile: String,
-    },
-  ],
+  friends: [{id: {type: Schema.Types.ObjectId, ref: 'users'}}],
 });
 
 const User = mongoose.model("users", userSchema);

@@ -16,6 +16,7 @@ router.post("/signup", (req, res) => {
 
   User.findOne({ username: req.body.username }).then((data) => {
     if (data === null) {
+     
       const hash = bcrypt.hashSync(req.body.password, 10);
 
       const newUser = new User({
@@ -47,25 +48,42 @@ router.post("/login", (req, res) => {
     return;
   }
 
-  User.findOne({ username: req.body.username }).then((data) => {
+  User.findOne({ username: req.body.username })
+  .populate({
+    path:'friends.id',
+    select:'name birthdate profilePic _id'
+  })
+  .then((data) => {
+    // console.log(JSON.stringify(data, null, 2))
     if (data && bcrypt.compareSync(req.body.password, data.password)) {
-      res.json({
+     
+      res.json({     
         result: true,
         token: data.token,
         username: data.username,
         email: data.email,
         userId: data._id,
+        name: data.name,
+        friends: data.friends, 
+        profilePic: data.profilePic
       });
     } else {
       res.json({ result: false, error: "User not found or wrong password" });
     }
   });
+
 });
 
 // retrieve user
 router.get("/search", (req, res) => {
   User.find().then((data) => {
     res.json({ result: true, usersList: data });
+  });
+});
+
+router.get("/friends/:username", (req, res) => {
+  User.findOne().then((data) => {
+    res.json({ result: true, users: data });
   });
 });
 
@@ -120,5 +138,11 @@ router.put("/update/:username", (req, res) => {
     }
   });
 });
+
+
+
+
+
+
 
 module.exports = router;
