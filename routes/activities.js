@@ -2,8 +2,6 @@ var express = require("express");
 var router = express.Router();
 const Activities = require("../models/activities");
 
-
-
 router.get('/activities', async (req, res) => {
   const { userId } = req.params;
 
@@ -17,11 +15,5 @@ router.get('/activities', async (req, res) => {
   }
   
 });
-
-
-
-
-
-
 
 module.exports = router;
