@@ -78,6 +78,7 @@ router.post("/login", (req, res) => {
 router.get("/search", (req, res) => {
   User.find()
     .populate("favoriteSports", "name")
+    .populate("favoriteActivities", "name")
     .then((data) => {
       res.json({ result: true, usersList: data });
     });
@@ -87,6 +88,7 @@ router.get("/search/:username", (req, res) => {
   const username = req.params.username;
   User.findOne({ username })
     .populate("favoriteSports", "name")
+    .populate("favoriteActivities", "name")
     .then((data) => {
       res.json({ result: true, userSearched: data });
     });
@@ -136,10 +138,10 @@ router.put("/update/:username", (req, res) => {
         ...(birthdate && { birthdate }),
         ...(gender && { gender }),
         ...(description && { description }),
-        ...(favoriteActivities && { favoriteActivities }),
         ...(city && { city }),
         ...(profilePic && { profilePic }),
       };
+
       if (favoriteSports) {
         return Sport.find({ name: { $in: favoriteSports } }).then((sports) => {
           updateData.favoriteSports = sports.map((sport) => sport._id);
@@ -148,6 +150,17 @@ router.put("/update/:username", (req, res) => {
         });
       }
 
+      if (favoriteActivities) {
+        return Sport.find({ name: { $in: favoriteActivities } }).then(
+          (activity) => {
+            updateData.favoriteActivities = activity.map(
+              (activity) => activity._id
+            );
+
+            return User.updateOne({ username }, updateData);
+          }
+        );
+      }
       // User.updateOne(
       //   { username },
       //   {
@@ -183,6 +196,7 @@ router.put("/update/:username", (req, res) => {
       if (result.modifiedCount > 0) {
         return User.findOne({ username })
           .populate("favoriteSports", "name")
+          .populate("favoriteActivities", "name")
           .then((updatedUser) => {
             res.json({
               result: true,

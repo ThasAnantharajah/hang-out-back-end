@@ -11,7 +11,7 @@ const userSchema = mongoose.Schema({
   birthdate: Date,
   gender: String,
   description: String,
-  favoriteActivities: [String],
+  favoriteActivities: [{ type: Schema.Types.ObjectId, ref: "activities" }],
   favoriteSports: [{ type: Schema.Types.ObjectId, ref: "sports" }],
   city: String,
   friends: [{ id: { type: Schema.Types.ObjectId, ref: "users" } }],
