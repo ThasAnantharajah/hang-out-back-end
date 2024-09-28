@@ -76,16 +76,20 @@ router.post("/login", (req, res) => {
 
 // retrieve users
 router.get("/search", (req, res) => {
-  User.find().then((data) => {
-    res.json({ result: true, usersList: data });
-  });
+  User.find()
+    .populate("favoriteSports", "name")
+    .then((data) => {
+      res.json({ result: true, usersList: data });
+    });
 });
 
 router.get("/search/:username", (req, res) => {
   const username = req.params.username;
-  User.findOne({ username }).then((data) => {
-    res.json({ result: true, userSearched: data });
-  });
+  User.findOne({ username })
+    .populate("favoriteSports", "name")
+    .then((data) => {
+      res.json({ result: true, userSearched: data });
+    });
 });
 
 // router.get("/friends/:username", (req, res) => {
@@ -191,7 +195,7 @@ router.put("/update/:username", (req, res) => {
           ...(gender && { gender }),
           ...(description && { description }),
           ...(favoriteActivities && { favoriteActivities }),
-          ...(favoriteSports && { favoriteSports }),
+          ...(favoriteSports && { favoriteSports: sportsId }),
           ...(city && { city }),
           ...(profilePic && { profilePic }),
         }
