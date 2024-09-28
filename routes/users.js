@@ -151,7 +151,7 @@ router.put("/update/:username", (req, res) => {
       }
 
       if (favoriteActivities) {
-        return Sport.find({ name: { $in: favoriteActivities } }).then(
+        return Activity.find({ name: { $in: favoriteActivities } }).then(
           (activity) => {
             updateData.favoriteActivities = activity.map(
               (activity) => activity._id
