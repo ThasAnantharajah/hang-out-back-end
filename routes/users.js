@@ -146,6 +146,17 @@ router.put("/update/:username", (req, res) => {
         return Sport.find({ name: { $in: favoriteSports } }).then((sports) => {
           updateData.favoriteSports = sports.map((sport) => sport._id);
 
+          if (favoriteActivities) {
+            return Activity.find({ name: { $in: favoriteActivities } }).then(
+              (activities) => {
+                updateData.favoriteActivities = activities.map(
+                  (activity) => activity._id
+                );
+                return User.updateOne({ username }, updateData);
+              }
+            );
+          }
+
           return User.updateOne({ username }, updateData);
         });
       }
@@ -160,34 +171,6 @@ router.put("/update/:username", (req, res) => {
           }
         );
       }
-      // User.updateOne(
-      //   { username },
-      //   {
-      //     ...(name && { name }),
-      //     ...(birthdate && { birthdate }),
-      //     ...(gender && { gender }),
-      //     ...(description && { description }),
-      //     ...(favoriteActivities && { favoriteActivities }),
-      //     ...(favoriteSports && { favoriteSports: sportsId }),
-      //     ...(city && { city }),
-      //     ...(profilePic && { profilePic }),
-      //   }
-      // ).then((result) => {
-      //   if (result.modifiedCount > 0) {
-      //     User.findOne({ username }).then((updatedUser) => {
-      //       res.json({
-      //         result: true,
-      //         message: "User updated successfully.",
-      //         data: updatedUser,
-      //       });
-      //     });
-      //   } else {
-      //     return res.json({
-      //       result: false,
-      //       message: "No changes were made to the user.",
-      //     });
-      //   }
-      // });
 
       return User.updateOne({ username }, updateData);
     })
