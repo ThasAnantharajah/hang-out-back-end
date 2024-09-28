@@ -8,13 +8,13 @@ const userSchema = mongoose.Schema({
   token: String,
   profilePic: String,
   name: String,
-  birthdate:{Date: Date},
+  birthdate: Date,
   gender: String,
   description: String,
-  activities: [{ name: String }],
-  sports: [{ name: String }],
+  favoriteActivities: [String],
+  favoriteSports: [String],
   city: String,
-  friends: [{id: {type: Schema.Types.ObjectId, ref: 'users'}}],
+  friends: [{ id: { type: Schema.Types.ObjectId, ref: "users" } }],
 });
 
 const User = mongoose.model("users", userSchema);

@@ -16,7 +16,6 @@ router.post("/signup", (req, res) => {
 
   User.findOne({ username: req.body.username }).then((data) => {
     if (data === null) {
-     
       const hash = bcrypt.hashSync(req.body.password, 10);
 
       const newUser = new User({
@@ -49,29 +48,27 @@ router.post("/login", (req, res) => {
   }
 
   User.findOne({ username: req.body.username })
-  .populate({
-    path:'friends.id',
-    select:'name birthdate profilePic _id'
-  })
-  .then((data) => {
-    // console.log(JSON.stringify(data, null, 2))
-    if (data && bcrypt.compareSync(req.body.password, data.password)) {
-     
-      res.json({     
-        result: true,
-        token: data.token,
-        username: data.username,
-        email: data.email,
-        userId: data._id,
-        name: data.name,
-        friends: data.friends, 
-        profilePic: data.profilePic
-      });
-    } else {
-      res.json({ result: false, error: "User not found or wrong password" });
-    }
-  });
-
+    .populate({
+      path: "friends.id",
+      select: "name birthdate profilePic _id",
+    })
+    .then((data) => {
+      // console.log(JSON.stringify(data, null, 2))
+      if (data && bcrypt.compareSync(req.body.password, data.password)) {
+        res.json({
+          result: true,
+          token: data.token,
+          username: data.username,
+          email: data.email,
+          userId: data._id,
+          name: data.name,
+          friends: data.friends,
+          profilePic: data.profilePic,
+        });
+      } else {
+        res.json({ result: false, error: "User not found or wrong password" });
+      }
+    });
 });
 
 // retrieve users
@@ -80,9 +77,6 @@ router.get("/search", (req, res) => {
     res.json({ result: true, usersList: data });
   });
 });
-
-
-
 
 router.get("/search/:username", (req, res) => {
   const username = req.params.username;
@@ -168,8 +162,8 @@ router.put("/update/:username", (req, res) => {
     birthdate,
     gender,
     description,
-    activities,
-    sports,
+    favoriteActivities,
+    favoriteSports,
     city,
     profilePic,
   } = req.body;
@@ -187,8 +181,8 @@ router.put("/update/:username", (req, res) => {
           ...(birthdate && { birthdate }),
           ...(gender && { gender }),
           ...(description && { description }),
-          ...(activities && { activities }),
-          ...(sports && { sports }),
+          ...(favoriteActivities && { favoriteActivities }),
+          ...(favoriteSports && { favoriteSports }),
           ...(city && { city }),
           ...(profilePic && { profilePic }),
         }
@@ -211,11 +205,5 @@ router.put("/update/:username", (req, res) => {
     }
   });
 });
-
-
-
-
-
-
 
 module.exports = router;
