@@ -1,6 +1,9 @@
 var express = require("express");
 var router = express.Router();
 const User = require("../models/users");
+const Sport = require("../models/sports");
+const Activity = require("../models/activities");
+
 const { checkBody } = require("../modules/checkBody");
 const uid2 = require("uid2");
 const bcrypt = require("bcrypt");
@@ -85,23 +88,23 @@ router.get("/search/:username", (req, res) => {
   });
 });
 
-router.get("/friends/:username", (req, res) => {
-  User.findOne().then((data) => {
-    res.json({ result: true, users: data });
-  });
-});
+// router.get("/friends/:username", (req, res) => {
+//   User.findOne().then((data) => {
+//     res.json({ result: true, users: data });
+//   });
+// });
 
-router.get("/friends/:username", (req, res) => {
-  User.findOne().then((data) => {
-    res.json({ result: true, users: data });
-  });
-});
+// router.get("/friends/:username", (req, res) => {
+//   User.findOne().then((data) => {
+//     res.json({ result: true, users: data });
+//   });
+// });
 
-router.get("/friends/:username", (req, res) => {
-  User.findOne().then((data) => {
-    res.json({ result: true, users: data });
-  });
-});
+// router.get("/friends/:username", (req, res) => {
+//   User.findOne().then((data) => {
+//     res.json({ result: true, users: data });
+//   });
+// });
 
 // // profile update route
 // router.put("/update/:username", (req, res) => {
@@ -174,6 +177,12 @@ router.put("/update/:username", (req, res) => {
     if (!existingUser) {
       return res.json({ result: false, message: "User was not found" });
     } else {
+      const sportsId = favoriteSports
+        ? Sport.find({ name: { $in: favoriteSports } }).then((sports) =>
+            sports.map((sport) => sport._id)
+          )
+        : existingUser.favoriteSports;
+
       User.updateOne(
         { username },
         {

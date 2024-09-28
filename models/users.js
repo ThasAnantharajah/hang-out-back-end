@@ -12,7 +12,7 @@ const userSchema = mongoose.Schema({
   gender: String,
   description: String,
   favoriteActivities: [String],
-  favoriteSports: [String],
+  favoriteSports: [{ type: Schema.Types.ObjectId, ref: "sports" }],
   city: String,
   friends: [{ id: { type: Schema.Types.ObjectId, ref: "users" } }],
 });
