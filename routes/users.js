@@ -152,11 +152,10 @@ router.put("/update/:username", (req, res) => {
 
       if (favoriteActivities) {
         return Activity.find({ name: { $in: favoriteActivities } }).then(
-          (activity) => {
-            updateData.favoriteActivities = activity.map(
+          (activities) => {
+            updateData.favoriteActivities = activities.map(
               (activity) => activity._id
             );
-
             return User.updateOne({ username }, updateData);
           }
         );
