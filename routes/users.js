@@ -110,58 +110,6 @@ router.get("/search/:username", (req, res) => {
 //   });
 // });
 
-// // profile update route
-// router.put("/update/:username", (req, res) => {
-//   const { username } = req.params;
-//   const {
-//     name,
-//     birthdate,
-//     gender,
-//     description,
-//     activities,
-//     sports,
-//     city,
-//     profilePic,
-//   } = req.body;
-
-//   console.log("Request to update user:", { username, userUpdate: req.body });
-
-//   User.findOne({ username }).then((existingUser) => {
-//     if (!existingUser) {
-//       return res.json({ result: false, message: "User was not found" });
-//     } else {
-//       User.updateOne(
-//         { username },
-//         {
-//           ...(name && { name }),
-//           ...(birthdate && { birthdate }),
-//           ...(gender && { gender }),
-//           ...(description && { description }),
-//           ...(activities && { activities }),
-//           ...(sports && { sports }),
-//           ...(city && { city }),
-//           ...(profilePic && { profilePic }),
-//         }
-//       ).then((result) => {
-//         if (result.modifiedCount > 0) {
-//           User.findOne({ username }).then((updatedUser) => {
-//             res.json({
-//               result: true,
-//               message: "User updated successfully.",
-//               data: updatedUser,
-//             });
-//           });
-//         } else {
-//           return res.json({
-//             result: false,
-//             message: "No changes were made to the user.",
-//           });
-//         }
-//       });
-//     }
-//   });
-// });
-
 router.put("/update/:username", (req, res) => {
   const { username } = req.params;
   const {
@@ -177,46 +125,80 @@ router.put("/update/:username", (req, res) => {
 
   console.log("Request to update user:", { username, userUpdate: req.body });
 
-  User.findOne({ username }).then((existingUser) => {
-    if (!existingUser) {
-      return res.json({ result: false, message: "User was not found" });
-    } else {
-      const sportsId = favoriteSports
-        ? Sport.find({ name: { $in: favoriteSports } }).then((sports) =>
-            sports.map((sport) => sport._id)
-          )
-        : existingUser.favoriteSports;
+  User.findOne({ username })
+    .then((existingUser) => {
+      if (!existingUser) {
+        return res.json({ result: false, message: "User was not found" });
+      }
 
-      User.updateOne(
-        { username },
-        {
-          ...(name && { name }),
-          ...(birthdate && { birthdate }),
-          ...(gender && { gender }),
-          ...(description && { description }),
-          ...(favoriteActivities && { favoriteActivities }),
-          ...(favoriteSports && { favoriteSports: sportsId }),
-          ...(city && { city }),
-          ...(profilePic && { profilePic }),
-        }
-      ).then((result) => {
-        if (result.modifiedCount > 0) {
-          User.findOne({ username }).then((updatedUser) => {
+      const updateData = {
+        ...(name && { name }),
+        ...(birthdate && { birthdate }),
+        ...(gender && { gender }),
+        ...(description && { description }),
+        ...(favoriteActivities && { favoriteActivities }),
+        ...(city && { city }),
+        ...(profilePic && { profilePic }),
+      };
+      if (favoriteSports) {
+        return Sport.find({ name: { $in: favoriteSports } }).then((sports) => {
+          updateData.favoriteSports = sports.map((sport) => sport._id);
+
+          return User.updateOne({ username }, updateData);
+        });
+      }
+
+      // User.updateOne(
+      //   { username },
+      //   {
+      //     ...(name && { name }),
+      //     ...(birthdate && { birthdate }),
+      //     ...(gender && { gender }),
+      //     ...(description && { description }),
+      //     ...(favoriteActivities && { favoriteActivities }),
+      //     ...(favoriteSports && { favoriteSports: sportsId }),
+      //     ...(city && { city }),
+      //     ...(profilePic && { profilePic }),
+      //   }
+      // ).then((result) => {
+      //   if (result.modifiedCount > 0) {
+      //     User.findOne({ username }).then((updatedUser) => {
+      //       res.json({
+      //         result: true,
+      //         message: "User updated successfully.",
+      //         data: updatedUser,
+      //       });
+      //     });
+      //   } else {
+      //     return res.json({
+      //       result: false,
+      //       message: "No changes were made to the user.",
+      //     });
+      //   }
+      // });
+
+      return User.updateOne({ username }, updateData);
+    })
+    .then((result) => {
+      if (result.modifiedCount > 0) {
+        return User.findOne({ username })
+          .populate("favoriteSports", "name")
+          .then((updatedUser) => {
             res.json({
               result: true,
               message: "User updated successfully.",
               data: updatedUser,
             });
           });
-        } else {
-          return res.json({
-            result: false,
-            message: "No changes were made to the user.",
-          });
-        }
-      });
-    }
-  });
+      }
+      res.json({ result: false, message: "No changes were made to the user." });
+    })
+    .catch((error) => {
+      console.error("Error updating user:", error);
+      res
+        .status(500)
+        .json({ result: false, message: "Error updating user", error });
+    });
 });
 
 module.exports = router;
