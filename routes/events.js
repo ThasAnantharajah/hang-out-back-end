@@ -112,44 +112,6 @@ router.get("/search/date/:date", (req, res) => {
   });
 });
 
-// SEARCH EVENT BASED ON ID
-// router.get("/search/:id", (req, res) => {
-//   const { id } = req.params;
-
-//   if (!mongoose.Types.ObjectId.isValid(id)) {
-//     return res.status(400).json({
-//       result: false,
-//       message: "Invalid event ID.",
-//     });
-//   }
-//   // Event.findById({ _id: id }).then((data) => {
-//   //   if (data) {
-//   //     res.json({
-//   //       result: true,
-//   //       message: "Single event found.",
-//   //       singleEvent: data,
-//   //     });
-//   //   }
-//   // });
-//   // });
-//   Event.findById({ _id: id })
-//     .then((event) => {
-//       if (!event) {
-//         return res
-//           .status(404)
-//           .json({ result: false, message: "Event not found." });
-//       }
-//       res.json({ result: true, message: "Event found", singleEvent: event });
-//     })
-//     .catch((err) => {
-//       res
-//         .status(500)
-//         .json({ result: false, message: "Server error", error: err.message });
-//     });
-// });
-
-// iMPORT
-
 router.get("/search/:id", (req, res) => {
   const { id } = req.params; // Handles route parameter: /search/66e24f095b0beff195eb0014
 
@@ -192,29 +154,39 @@ router.put("/register/:eventID/:userId", (req, res) => {
       if (!user) {
         return res
           .status(404)
-          .json({ result: false, message: "User not found" });
+          .json({ result: false, message: "User not found." });
       }
 
       Event.findById(eventID)
         .then((event) => {
           if (!event) {
-            return res.status(404).json({ message: "Event not found" });
+            return res
+              .status(404)
+              .json({ result: false, message: "Event not found." });
           }
 
           if (event.participants.length >= event.slots) {
-            return res.status(400).json({ message: "No available slots" });
+            return res
+              .status(400)
+              .json({ result: false, message: "No available slots." });
           }
 
           const isAlreadyRegistered = event.participants.some(
             (participant) => participant.user.toString() === userId
           );
           if (isAlreadyRegistered) {
-            return res.status(400).json({ message: "User already registered" });
+            return res
+              .status(400)
+              .json({ result: false, message: "User is already registered." });
           }
 
-          Event.findByIdAndUpdate(eventID, {
-            $push: { participants: { user: userId, isRegistered: true } },
-          })
+          Event.findByIdAndUpdate(
+            eventID,
+            {
+              $push: { participants: { user: userId, isRegistered: true } },
+            },
+            { new: true }
+          )
             .then((updatedEvent) => {
               res.status(200).json({
                 result: true,
@@ -223,7 +195,71 @@ router.put("/register/:eventID/:userId", (req, res) => {
               });
             })
             .catch(() => {
-              res.status(500).json({ message: "Error updating event" });
+              res
+                .status(500)
+                .json({
+                  result: false,
+                  message: "Error updating the event participants.",
+                });
+            });
+        })
+        .catch(() => {
+          res
+            .status(500)
+            .json({ result: false, message: "Error finding event." });
+        });
+    })
+    .catch(() => {
+      res.status(500).json({ result: false, message: "Error finding user." });
+    });
+});
+
+// unregister from event
+// check user et event, check regist true, retirer particip
+router.put("/unregister/:eventID/:userId", (req, res) => {
+  const { eventID, userId } = req.params;
+
+  User.findById(userId)
+    .then((user) => {
+      if (!user) {
+        return res
+          .status(404)
+          .json({ result: false, message: "User not found." });
+      }
+
+      Event.findById(eventID)
+        .then((event) => {
+          if (!event) {
+            return res
+              .status(404)
+              .json({ result: false, message: "Event not found." });
+          }
+
+          const isRegistered = event.participants.some(
+            (participant) => participant.user.toString() === userId
+          );
+          if (!isRegistered) {
+            return res
+              .status(400)
+              .json({ result: false, message: "User is not registered yet." });
+          }
+
+          Event.findByIdAndUpdate(
+            eventID,
+            { $pull: { participants: { user: userId } } },
+            { new: true }
+          )
+            .then((updatedEvent) => {
+              res.status(200).json({
+                result: true,
+                message: "Unregistration successful.",
+                participantsUpdated: updatedEvent.participants,
+              });
+            })
+            .catch(() => {
+              res
+                .status(500)
+                .json({ message: "Error updating event's participants." });
             });
         })
         .catch(() => {
