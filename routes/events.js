@@ -195,12 +195,10 @@ router.put("/register/:eventID/:userId", (req, res) => {
               });
             })
             .catch(() => {
-              res
-                .status(500)
-                .json({
-                  result: false,
-                  message: "Error updating the event participants.",
-                });
+              res.status(500).json({
+                result: false,
+                message: "Error updating the event participants.",
+              });
             });
         })
         .catch(() => {
@@ -259,15 +257,52 @@ router.put("/unregister/:eventID/:userId", (req, res) => {
             .catch(() => {
               res
                 .status(500)
-                .json({ message: "Error updating event's participants." });
+                .json({
+                  result: false,
+                  message: "Error updating event's participants.",
+                });
             });
         })
         .catch(() => {
-          res.status(500).json({ message: "Error finding event" });
+          res
+            .status(500)
+            .json({ result: false, message: "Error finding event" });
         });
     })
     .catch(() => {
-      res.status(500).json({ message: "Error finding user" });
+      res.status(500).json({ result: false, message: "Error finding user" });
+    });
+});
+
+// retriev reg users
+router.get("/:eventID/registered-users", (req, res) => {
+  const { eventID } = req.params;
+
+  Event.findById(eventID)
+    .populate("participants.user", "name")
+    .then((event) => {
+      if (!event) {
+        return res
+          .status(404)
+          .json({ result: false, message: "Event not found." });
+      }
+
+      const registeredUsers = event.participants.filter(
+        (participant) => participant.isRegistered === true
+      );
+
+      res.status(200).json({
+        result: true,
+        registeredUsers: registeredUsers.map((participant) => ({
+          userId: participant.user._id,
+          name: participant.user.name,
+        })),
+      });
+    })
+    .catch(() => {
+      res
+        .status(500)
+        .json({ result: false, message: "Error retrieving registered users." });
     });
 });
 
