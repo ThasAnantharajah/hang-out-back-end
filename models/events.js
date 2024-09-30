@@ -9,6 +9,11 @@ const placeSchema = mongoose.Schema({
   },
 });
 
+const participantSchema = mongoose.Schema({
+  user: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
+  isRegistered: { type: Boolean, default: false },
+});
+
 const eventSchema = mongoose.Schema({
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
   name: String,
@@ -22,7 +27,7 @@ const eventSchema = mongoose.Schema({
   slots: Number,
   expenses: Boolean,
   femaleOnly: Boolean,
-  participants: [String],
+  participants: [participantSchema],
 });
 
 const Event = mongoose.model("events", eventSchema);

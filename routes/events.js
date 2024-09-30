@@ -1,6 +1,8 @@
 var express = require("express");
 var router = express.Router();
 const Event = require("../models/events");
+const User = require("../models/users");
+
 const mongoose = require("mongoose");
 const moment = require("moment");
 
@@ -25,6 +27,7 @@ router.post("/add", (req, res) => {
   // console.log(new Date(req.body.date) instanceof Date);
   const newEvent = new Event({
     name: req.body.name,
+    desc: req.body.desc,
     type: req.body.type,
     event: req.body.event,
     startTime: req.body.startTime,
@@ -159,6 +162,7 @@ router.get("/search/:id", (req, res) => {
 
   Event.findById(id)
     .populate("createdBy", "username")
+    .populate("participants", "name")
     .then((event) => {
       if (!event) {
         return res.status(404).json({
@@ -177,42 +181,58 @@ router.get("/search/:id", (req, res) => {
     });
 });
 
-//REGISTER TO AN EVENT
-router.put("/register/:eventID/:username", (req, res) => {
-  const { username, eventID } = req.params;
+/// register
 
-  Event.findById(eventID).then((event) => {
-    if (!event) {
-      return res.json({ result: false, message: "Event not found." });
-    }
-    if (event.participants.includes(username)) {
-      return res.json({ result: false, message: "User already registered." });
-    }
-    if (event.participants.length >= event.slots) {
-      return res.json({ result: false, message: "Event is full." });
-    }
+router.put("/register/:eventID/:userId", (req, res) => {
+  const { eventID, userId } = req.params;
 
-    Event.updateOne(
-      { _id: eventID },
-      { $push: { participants: username } }
-    ).then((event) => {
-      if (!event) {
-        return res.json({ result: false, message: "Event not found." });
-      }
-      if (event.participants.includes(username)) {
-        return res.json({ result: false, message: "User already registered." });
-      }
-      if (event.participants.length >= event.slots) {
-        return res.json({ result: false, message: "Event is full." });
+  // voir si user et event exist, si déjà registered, si slots dispo
+  User.findById(userId)
+    .then((user) => {
+      if (!user) {
+        return res
+          .status(404)
+          .json({ result: false, message: "User not found" });
       }
 
-      res.json({
-        result: true,
-        message: "User registered to event.",
-        registeredUsers: event.participants,
-      });
+      Event.findById(eventID)
+        .then((event) => {
+          if (!event) {
+            return res.status(404).json({ message: "Event not found" });
+          }
+
+          if (event.participants.length >= event.slots) {
+            return res.status(400).json({ message: "No available slots" });
+          }
+
+          const isAlreadyRegistered = event.participants.some(
+            (participant) => participant.user.toString() === userId
+          );
+          if (isAlreadyRegistered) {
+            return res.status(400).json({ message: "User already registered" });
+          }
+
+          Event.findByIdAndUpdate(eventID, {
+            $push: { participants: { user: userId, isRegistered: true } },
+          })
+            .then((updatedEvent) => {
+              res.status(200).json({
+                result: true,
+                message: "Registration successfull.",
+                participantsUpdated: updatedEvent.participants,
+              });
+            })
+            .catch(() => {
+              res.status(500).json({ message: "Error updating event" });
+            });
+        })
+        .catch(() => {
+          res.status(500).json({ message: "Error finding event" });
+        });
+    })
+    .catch(() => {
+      res.status(500).json({ message: "Error finding user" });
     });
-  });
 });
 
 module.exports = router;
