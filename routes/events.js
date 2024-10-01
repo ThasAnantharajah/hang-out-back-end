@@ -293,7 +293,10 @@ router.get("/:eventID/registered-users", (req, res) => {
         result: true,
         registeredUsers: registeredUsers.map((participant) => ({
           userId: participant.user._id,
-          name: participant.user.name,
+          name: participant.user.name || "No Name",
+          city: participant.user.city || "No City",
+          birthdate: participant.user.birthdate || "No Birthdate",
+          profilePic: participant.user.profilePic || "No Profile Pic",
         })),
       });
     })
