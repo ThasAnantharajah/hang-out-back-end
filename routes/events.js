@@ -148,7 +148,7 @@ router.get("/search/:id", (req, res) => {
 router.put("/register/:eventID/:userId", (req, res) => {
   const { eventID, userId } = req.params;
 
-  // voir si user et event exist, si déjà registered, si slots dispo
+  // voir si user et event exist, si déjà registered, si slots dispo + FEMALE ONLY mngt
   User.findById(userId)
     .then((user) => {
       if (!user) {
@@ -165,9 +165,18 @@ router.put("/register/:eventID/:userId", (req, res) => {
               .json({ result: false, message: "Event not found." });
           }
 
+          if (event.femaleOnly) {
+            if (user.gender === "Male" || user.gender === "Don't want to say") {
+              return res.status(403).json({
+                result: false,
+                message: "Registration not allowed: Event is female-only.",
+              });
+            }
+          }
+
           if (event.participants.length >= event.slots) {
             return res
-              .status(400)
+              .status(403)
               .json({ result: false, message: "No available slots." });
           }
 
