@@ -255,12 +255,10 @@ router.put("/unregister/:eventID/:userId", (req, res) => {
               });
             })
             .catch(() => {
-              res
-                .status(500)
-                .json({
-                  result: false,
-                  message: "Error updating event's participants.",
-                });
+              res.status(500).json({
+                result: false,
+                message: "Error updating event's participants.",
+              });
             });
         })
         .catch(() => {
@@ -279,7 +277,7 @@ router.get("/:eventID/registered-users", (req, res) => {
   const { eventID } = req.params;
 
   Event.findById(eventID)
-    .populate("participants.user", "name")
+    .populate("participants.user", "name profilePic gender city birthdate")
     .then((event) => {
       if (!event) {
         return res
